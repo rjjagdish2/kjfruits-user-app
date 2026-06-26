@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: ResponsiveHelper.isDesktop(context)? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget()): AppBar(
           backgroundColor: Theme.of(context).cardColor,
           leading: IconButton(
-              icon: Image.asset(Images.moreIcon, color: Theme.of(context).primaryColor),
+              icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).primaryColor, size: 20),
               onPressed: () {
                 splashProvider.setPageIndex(0);
                 if (Navigator.canPop(context) && !ResponsiveHelper.isDesktop(context)) {
