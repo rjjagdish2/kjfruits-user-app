@@ -50,7 +50,8 @@ class _WishListScreenState extends State<WishListScreen> {
               onRefresh: () async {
                 await Provider.of<WishListProvider>(context, listen: false).getWishListProduct();
               },
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).cardColor,
+              color: Theme.of(context).primaryColor,
               child: CustomScrollView(slivers: [
                 SliverToBoxAdapter(child: Center(
                   child: Padding(

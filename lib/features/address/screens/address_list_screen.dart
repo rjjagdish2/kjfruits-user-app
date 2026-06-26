@@ -56,7 +56,8 @@ class _AddressListScreenState extends State<AddressListScreen> {
               onRefresh: () async {
                 await locationProvider.initAddressList();
               },
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).cardColor,
+              color: Theme.of(context).primaryColor,
               child: CustomScrollView(slivers: [
                 SliverToBoxAdapter(child: Center(child: SizedBox(
                   width: Dimensions.webScreenWidth,

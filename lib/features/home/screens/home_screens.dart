@@ -100,7 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
         await HomeScreen.loadData(true, context);
         Provider.of<OrderProvider>(Get.context!, listen: false).manageDialog();
       },
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).cardColor,
+      color: Theme.of(context).primaryColor,
       child: Scaffold(
         appBar: ResponsiveHelper.isDesktop(context) ? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget())  : null,
         body: CustomScrollView(controller: scrollController, slivers: [

@@ -31,7 +31,8 @@ class OrderWidget extends StatelessWidget {
               await Provider.of<OrderProvider>(context, listen: false).getOrderList(context);
               },
 
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme.of(context).cardColor,
+            color: Theme.of(context).primaryColor,
             child: CustomScrollView(slivers: [
               SliverToBoxAdapter(child: Center(child: SizedBox(
                 width: Dimensions.webScreenWidth,

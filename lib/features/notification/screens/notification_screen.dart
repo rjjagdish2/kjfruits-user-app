@@ -70,7 +70,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
           onRefresh: () async {
             await Provider.of<NotificationProvider>(context, listen: false).getNotificationList();
           },
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).cardColor,
+          color: Theme.of(context).primaryColor,
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(

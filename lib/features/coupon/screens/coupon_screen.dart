@@ -59,7 +59,8 @@ class _CouponScreenState extends State<CouponScreen> {
               onRefresh: () async {
                 await couponProvider.getCouponList(context);
               },
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).cardColor,
+              color: Theme.of(context).primaryColor,
               child: SingleChildScrollView(
                 child: Column(children: [
                   Center(child: ConstrainedBox(
