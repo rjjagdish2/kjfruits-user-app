@@ -84,7 +84,7 @@ class _CustomDrawerWidgetState extends State<CustomDrawerWidget>
     stateNotifier = ValueNotifier(_state);
 
     _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500))
+        vsync: this, duration: const Duration(milliseconds: 250))
       ..addStatusListener((AnimationStatus status) {
         switch (status) {
           case AnimationStatus.forward:
