@@ -64,6 +64,9 @@ class HtmlViewerScreen extends StatelessWidget {
         break;
     }
 
+    if (imageUrl.contains('/storage/business-settings/')) {
+      imageUrl = imageUrl.replaceAll('/storage/business-settings/', '/storage/app/public/business-settings/');
+    }
 
     if(data.isNotEmpty) {
       data = data.replaceAll('href=', 'target="_blank" href=');
