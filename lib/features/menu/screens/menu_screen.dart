@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_grocery/common/widgets/custom_asset_image_widget.dart';
 import 'package:flutter_grocery/features/menu/domain/models/custom_drawer_controller_model.dart';
+import 'package:flutter_grocery/features/menu/domain/models/main_screen_model.dart';
 import 'package:flutter_grocery/helper/responsive_helper.dart';
 import 'package:flutter_grocery/helper/route_helper.dart';
 import 'package:flutter_grocery/localization/language_constraints.dart';
@@ -68,51 +69,95 @@ class MenuWidget extends StatelessWidget {
 
   const MenuWidget({super.key, this.drawerController});
 
+  Widget _buildMenuList(
+    BuildContext context, {
+    required List<MainScreenModel> items,
+    required SplashProvider splash,
+    required SplashProvider splashProvider,
+    required Color activeTileBg,
+    required Color activeTextColor,
+    required Color textPrimaryColor,
+    required Color textSecondaryColor,
+  }) {
+    return Column(
+      children: items.map((model) {
+        final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSelected ? activeTileBg : Colors.transparent,
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: InkWell(
+              onTap: () {
+                if (!ResponsiveHelper.isDesktop(context)) {
+                  splash.setPageIndex(splashProvider.screenList.indexOf(model));
+                }
+                drawerController!.toggle();
+              },
+              borderRadius: BorderRadius.circular(100),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    CustomAssetImageWidget(
+                      model.icon,
+                      color: isSelected ? activeTextColor : textSecondaryColor,
+                      width: 20,
+                      height: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        getTranslated(model.title, context),
+                        style: poppinsMedium.copyWith(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected ? activeTextColor : textPrimaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final SplashProvider splashProvider = Provider.of<SplashProvider>(context, listen: false);
     final bool isLoggedIn = Provider.of<AuthProvider>(context, listen: false).isLoggedIn();
     final bool isDark = Provider.of<ThemeProvider>(context).darkTheme;
 
-    // Premium modern backgrounds and gradients
-    final backgroundGradient = isDark 
-        ? const LinearGradient(
-            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          )
-        : const LinearGradient(
-            colors: [Color(0xFFE6F7F4), Color(0xFFFFFFFF)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          );
-
-    final profileCardGradient = isDark 
-        ? LinearGradient(
-            colors: [
-              const Color(0xFF0F172A).withValues(alpha: 0.8),
-              Theme.of(context).primaryColor.withValues(alpha: 0.3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
-        : LinearGradient(
-            colors: [
-              Theme.of(context).primaryColor,
-              const Color(0xFF00D0AF),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          );
-
-    final profileCardColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    // Theme Colors
+    final backgroundColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFFFFFFF);
     final textPrimaryColor = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final textSecondaryColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final activeTileBg = isDark ? Theme.of(context).primaryColor.withValues(alpha: 0.15) : const Color(0xFFE6F7F4);
     final activeTextColor = isDark ? const Color(0xFF00D0AF) : const Color(0xFF01937C);
+    final activeTileBg = isDark ? const Color(0xFF00D0AF).withValues(alpha: 0.1) : const Color(0xFF01937C).withValues(alpha: 0.08);
 
-    final cardTextPrimaryColor = isDark ? const Color(0xFFF8FAFC) : Colors.white;
-    final cardTextSecondaryColor = isDark ? const Color(0xFF94A3B8) : Colors.white.withValues(alpha: 0.8);
+    // Filter Screens
+    final activeScreens = splashProvider.screenList.where((model) => model.isActive).toList();
+
+    final List<String> generalTitles = ['home', 'all_categories', 'shopping_bag', 'favourite'];
+    final List<String> accountTitles = ['my_order', 'order_track', 'address', 'wallet', 'loyalty_point', 'coupon', 'live_chat', 'referAndEarn', 'settings'];
+    final List<String> infoTitles = ['about_us', 'faq', 'terms_and_condition', 'privacy_policy', 'return_policy', 'refund_policy', 'cancellation_policy'];
+
+    final generalItems = activeScreens.where((m) => generalTitles.contains(m.title)).toList();
+    final accountItems = activeScreens.where((m) => accountTitles.contains(m.title)).toList();
+    final infoItems = activeScreens.where((m) => infoTitles.contains(m.title)).toList();
+
+    // Fallback for uncategorized items
+    final List<String> categorizedTitles = [...generalTitles, ...accountTitles, ...infoTitles];
+    final otherItems = activeScreens.where((m) => !categorizedTitles.contains(m.title)).toList();
+    if (otherItems.isNotEmpty) {
+      accountItems.addAll(otherItems);
+    }
 
     return PopScope(
       canPop: true,
@@ -122,26 +167,22 @@ class MenuWidget extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: backgroundColor,
         appBar: ResponsiveHelper.isDesktop(context)? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget()) : null,
-        body: Container(
-          decoration: BoxDecoration(gradient: backgroundGradient),
-          child: SafeArea(
-            child: ResponsiveHelper.isDesktop(context)? Consumer<SplashProvider>(
-                builder: (context, splashProvider, _) {
-                  return MenuListWebWidget(isLoggedIn: isLoggedIn);
-                }
-            ) : SingleChildScrollView(
-              child: Center(
-                child: SizedBox(
-                  width: Dimensions.webScreenWidth,
-                  child: Consumer<SplashProvider>(
-                    builder: (context, splash, child) {
-                      final activeScreens = splashProvider.screenList.where((model) => model.isActive).toList();
-
-                      return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+        body: SafeArea(
+          child: ResponsiveHelper.isDesktop(context)? Consumer<SplashProvider>(
+              builder: (context, splashProvider, _) {
+                return MenuListWebWidget(isLoggedIn: isLoggedIn);
+              }
+          ) : SingleChildScrollView(
+            child: Center(
+              child: SizedBox(
+                width: Dimensions.webScreenWidth,
+                child: Consumer<SplashProvider>(
+                  builder: (context, splash, child) {
+                    return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                        !ResponsiveHelper.isDesktop(context) ? Padding(
                          padding: const EdgeInsets.only(left: 20.0, right: 16.0, top: 16.0, bottom: 8.0),
                          child: Row(
@@ -149,36 +190,28 @@ class MenuWidget extends StatelessWidget {
                            children: [
                              Row(
                                children: [
-                                 Image.asset(Images.appLogo, width: 36, height: 36),
+                                 Image.asset(Images.appLogo, width: 28, height: 28),
                                  const SizedBox(width: 10),
                                  Text(
                                    'KJ Fruits',
                                    style: poppinsBold.copyWith(
-                                     fontSize: 20,
+                                     fontSize: 18,
                                      color: textPrimaryColor,
-                                     letterSpacing: 0.5,
                                    ),
                                  ),
                                ],
                              ),
-                             Container(
-                               decoration: BoxDecoration(
-                                 shape: BoxShape.circle,
-                                 color: profileCardColor,
-                                 border: Border.all(color: textSecondaryColor.withValues(alpha: 0.1)),
-                               ),
-                               child: IconButton(
-                                 icon: Icon(Icons.close_rounded, color: textPrimaryColor, size: 18),
-                                 padding: EdgeInsets.zero,
-                                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                 onPressed: () => drawerController!.toggle(),
-                               ),
+                             IconButton(
+                               icon: Icon(Icons.close_rounded, color: textSecondaryColor, size: 20),
+                               padding: EdgeInsets.zero,
+                               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                               onPressed: () => drawerController!.toggle(),
                              ),
                            ],
                          ),
                        ) : const SizedBox(),
 
-                        // Profile Info Section Card
+                        // Compact Profile Section
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                           child: InkWell(
@@ -189,43 +222,24 @@ class MenuWidget extends StatelessWidget {
                                 RouteHelper.getLoginRoute();
                               }
                             },
-                            borderRadius: BorderRadius.circular(18),
-                            child: Container(
-                              padding: const EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                gradient: profileCardGradient,
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: (isDark ? Colors.black : Theme.of(context).primaryColor).withValues(alpha: 0.15),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 8),
-                                  )
-                                ],
-                                border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.15)),
-                              ),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                               child: Consumer<ProfileProvider>(
                                 builder: (context, profileProvider, child) => Row(
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 2),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          )
-                                        ],
+                                        border: Border.all(color: textSecondaryColor.withValues(alpha: 0.15), width: 1),
                                       ),
                                       child: ClipOval(
                                         child: isLoggedIn ? splashProvider.baseUrls != null ?
                                         CustomImageWidget(
                                           placeholder: Images.profile,
                                           image: '${splashProvider.baseUrls?.customerImageUrl}/${profileProvider.userInfoModel?.image}',
-                                          height: 52, width: 52, fit: BoxFit.cover,
-                                        ) : const SizedBox() : Image.asset(Images.profile, height: 52, width: 52, fit: BoxFit.cover),
+                                          height: 44, width: 44, fit: BoxFit.cover,
+                                        ) : const SizedBox() : Image.asset(Images.profile, height: 44, width: 44, fit: BoxFit.cover),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -236,32 +250,30 @@ class MenuWidget extends StatelessWidget {
                                         children: [
                                           isLoggedIn ? profileProvider.userInfoModel != null ? Text(
                                             '${profileProvider.userInfoModel!.fName ?? ''} ${profileProvider.userInfoModel!.lName ?? ''}',
-                                            style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
+                                            style: poppinsMedium.copyWith(color: textPrimaryColor, fontSize: 15, fontWeight: FontWeight.w600),
                                             maxLines: 1, overflow: TextOverflow.ellipsis,
-                                          ) : Container(height: 12, width: 120, color: cardTextSecondaryColor.withValues(alpha: 0.2)) : Text(
+                                          ) : Container(height: 12, width: 120, color: textSecondaryColor.withValues(alpha: 0.1)) : Text(
                                             getTranslated('guest', context),
-                                            style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
+                                            style: poppinsMedium.copyWith(color: textPrimaryColor, fontSize: 15, fontWeight: FontWeight.w600),
                                           ),
-                                          const SizedBox(height: 4),
-                                          if(isLoggedIn && profileProvider.userInfoModel != null ) Text(
-                                            profileProvider.userInfoModel!.phone ?? '',
-                                            style: poppinsRegular.copyWith(color: cardTextSecondaryColor, fontSize: Dimensions.fontSizeSmall),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            isLoggedIn 
+                                                ? (profileProvider.userInfoModel?.email ?? profileProvider.userInfoModel?.phone ?? '') 
+                                                : 'Please login to your account',
+                                            style: poppinsRegular.copyWith(color: textSecondaryColor, fontSize: 12),
                                             maxLines: 1, overflow: TextOverflow.ellipsis,
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white.withValues(alpha: 0.15),
-                                      ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.notifications_none_rounded, color: cardTextPrimaryColor, size: 22),
-                                        onPressed: () {
-                                          RouteHelper.getNotificationScreen();
-                                        },
-                                      ),
+                                    IconButton(
+                                      icon: Icon(Icons.notifications_none_rounded, color: textSecondaryColor, size: 20),
+                                      onPressed: () {
+                                        RouteHelper.getNotificationScreen();
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                     ),
                                   ],
                                 ),
@@ -270,135 +282,113 @@ class MenuWidget extends StatelessWidget {
                           ),
                         ),
 
-                        // Section Divider
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Divider(
-                            color: textSecondaryColor.withValues(alpha: 0.15),
-                            height: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Flat List Menu Items
-                        if (!ResponsiveHelper.isDesktop(context))
-                          Column(
-                            children: activeScreens.map((model) {
-                              final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (!ResponsiveHelper.isDesktop(context)) {
-                                      splash.setPageIndex(splashProvider.screenList.indexOf(model));
-                                    }
-                                    drawerController!.toggle();
-                                  },
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? activeTileBg : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        if (isSelected)
-                                          Container(
-                                            width: 4,
-                                            height: 20,
-                                            margin: const EdgeInsets.only(right: 8),
-                                            decoration: BoxDecoration(
-                                              color: activeTextColor,
-                                              borderRadius: BorderRadius.circular(2),
-                                            ),
-                                          )
-                                        else
-                                          const SizedBox(width: 12),
-                                        CustomAssetImageWidget(
-                                          model.icon,
-                                          color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            getTranslated(model.title, context),
-                                            style: poppinsMedium.copyWith(
-                                              fontSize: 15,
-                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                              color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                                            ),
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            size: 12,
-                                            color: activeTextColor,
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                        // Section 1: General Items
+                        if (generalItems.isNotEmpty && !ResponsiveHelper.isDesktop(context))
+                          _buildMenuList(
+                            context,
+                            items: generalItems,
+                            splash: splash,
+                            splashProvider: splashProvider,
+                            activeTileBg: activeTileBg,
+                            activeTextColor: activeTextColor,
+                            textPrimaryColor: textPrimaryColor,
+                            textSecondaryColor: textSecondaryColor,
                           ),
 
-                        // Bottom Divider
+                        // Lightweight Divider 1
+                        if (generalItems.isNotEmpty && accountItems.isNotEmpty && !ResponsiveHelper.isDesktop(context))
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                            child: Divider(
+                              height: 1,
+                              color: textSecondaryColor.withValues(alpha: 0.15),
+                            ),
+                          ),
+
+                        // Section 2: Account Items
+                        if (accountItems.isNotEmpty && !ResponsiveHelper.isDesktop(context))
+                          _buildMenuList(
+                            context,
+                            items: accountItems,
+                            splash: splash,
+                            splashProvider: splashProvider,
+                            activeTileBg: activeTileBg,
+                            activeTextColor: activeTextColor,
+                            textPrimaryColor: textPrimaryColor,
+                            textSecondaryColor: textSecondaryColor,
+                          ),
+
+                        // Lightweight Divider 2
+                        if (accountItems.isNotEmpty && infoItems.isNotEmpty && !ResponsiveHelper.isDesktop(context))
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                            child: Divider(
+                              height: 1,
+                              color: textSecondaryColor.withValues(alpha: 0.15),
+                            ),
+                          ),
+
+                        // Section 3: Policies & Info Items
+                        if (infoItems.isNotEmpty && !ResponsiveHelper.isDesktop(context))
+                          _buildMenuList(
+                            context,
+                            items: infoItems,
+                            splash: splash,
+                            splashProvider: splashProvider,
+                            activeTileBg: activeTileBg,
+                            activeTextColor: activeTextColor,
+                            textPrimaryColor: textPrimaryColor,
+                            textSecondaryColor: textSecondaryColor,
+                          ),
+
+                        // Lightweight Bottom Divider
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
                           child: Divider(
-                            color: textSecondaryColor.withValues(alpha: 0.15),
                             height: 1,
+                            color: textSecondaryColor.withValues(alpha: 0.15),
                           ),
                         ),
 
                         // Login/Logout Button
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: InkWell(
-                            onTap: () {
-                              if(isLoggedIn) {
-                                showDialog(context: context, barrierDismissible: false, builder: (context) => const SignOutDialogWidget());
-                              }else {
-                                splashProvider.setPageIndex(0);
-                                RouteHelper.getLoginRoute(action: RouteAction.pushNamedAndRemoveUntil);
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: isLoggedIn ? Colors.redAccent.withValues(alpha: 0.08) : activeTileBg,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isLoggedIn ? Colors.redAccent.withValues(alpha: 0.2) : activeTextColor.withValues(alpha: 0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const SizedBox(width: 12),
-                                  CustomAssetImageWidget(isLoggedIn ? Images.logOut : Images.logIn,
-                                    width: 20, height: 20,
-                                    color: isLoggedIn ? Colors.redAccent : activeTextColor,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      getTranslated(isLoggedIn ? 'log_out' : 'login', context),
-                                      style: poppinsMedium.copyWith(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: isLoggedIn ? Colors.redAccent : activeTextColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isLoggedIn ? Colors.redAccent.withValues(alpha: 0.08) : activeTileBg,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                if(isLoggedIn) {
+                                  showDialog(context: context, barrierDismissible: false, builder: (context) => const SignOutDialogWidget());
+                                }else {
+                                  splashProvider.setPageIndex(0);
+                                  RouteHelper.getLoginRoute(action: RouteAction.pushNamedAndRemoveUntil);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(100),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    CustomAssetImageWidget(isLoggedIn ? Images.logOut : Images.logIn,
+                                      width: 20, height: 20,
+                                      color: isLoggedIn ? Colors.redAccent : activeTextColor,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        getTranslated(isLoggedIn ? 'log_out' : 'login', context),
+                                        style: poppinsMedium.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: isLoggedIn ? Colors.redAccent : activeTextColor,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 12,
-                                    color: isLoggedIn ? Colors.redAccent : activeTextColor,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -412,10 +402,9 @@ class MenuWidget extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
 
 class MenuButton {
   final String routeName;
