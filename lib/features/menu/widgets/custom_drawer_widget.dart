@@ -164,7 +164,7 @@ class _CustomDrawerWidgetState extends State<CustomDrawerWidget>
               top: 0,
               bottom: 0,
               child: Transform.translate(
-                offset: Offset(-slideAmount, 0),
+                offset: Offset(slideAmount, 0),
                 child: Container(
                   width: widget.slideWidth,
                   decoration: BoxDecoration(
