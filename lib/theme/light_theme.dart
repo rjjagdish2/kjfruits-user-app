@@ -13,7 +13,7 @@ ThemeData light = ThemeData(
   canvasColor: const Color(0xFFF8FAFC),
   shadowColor: Colors.black.withValues(alpha: 0.04),
 
-  cardTheme: CardTheme(
+  cardTheme: CardThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     elevation: 0,
     color: Colors.white,
