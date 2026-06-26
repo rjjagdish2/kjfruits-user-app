@@ -10,7 +10,7 @@ class CustomShadowWidget extends StatelessWidget {
   const CustomShadowWidget({
     super.key, required this.child, this.padding = EdgeInsets.zero,
     this.margin = EdgeInsets.zero,
-    this.borderRadius = Dimensions.radiusSizeDefault,
+    this.borderRadius = 16.0,
     this.isActive = true,
   });
 
@@ -23,9 +23,16 @@ class CustomShadowWidget extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(borderRadius!),
         boxShadow: [
-          BoxShadow(offset: const Offset(0, 5), blurRadius: 15, spreadRadius: -3, color: Theme.of(context).hintColor.withValues(alpha: 0.02)),
-
-          BoxShadow(offset: const Offset(0, 0), blurRadius: 3, color: Theme.of(context).hintColor.withValues(alpha: 0.2)),
+          BoxShadow(
+            offset: const Offset(0, 8),
+            blurRadius: 24,
+            color: Colors.black.withValues(alpha: 0.04),
+          ),
+          BoxShadow(
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.04),
+          ),
         ],
       ),
       child: child,

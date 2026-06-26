@@ -22,7 +22,7 @@ class CustomButtonWidget extends StatelessWidget {
     required this.onPressed,
     this.margin = 0,
     this.textColor,
-    this.borderRadius = 10,
+    this.borderRadius = 12,
     this.backgroundColor,
     this.width,
     this.height,
@@ -34,15 +34,18 @@ class CustomButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultBg = backgroundColor ?? (onPressed == null ? Theme.of(context).hintColor.withValues(alpha: 0.6) : Theme.of(context).primaryColor);
     return Padding(
       padding: EdgeInsets.all(margin),
       child: TextButton(
         onPressed: isLoading ? null : onPressed as void Function()?,
         style: TextButton.styleFrom(
-          backgroundColor: backgroundColor ?? (onPressed == null ? Theme.of(context).hintColor.withValues(alpha: 0.6) : Theme.of(context).primaryColor),
+          backgroundColor: defaultBg,
           minimumSize: Size( Dimensions.webScreenWidth,  height ?? 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
           side: borderColor != null ? BorderSide(color: borderColor!, width: 1) : null,
+          elevation: (onPressed == null || isLoading) ? 0 : 6,
+          shadowColor: defaultBg.withValues(alpha: 0.25),
         ),
         child: isLoading ?
         Center(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
