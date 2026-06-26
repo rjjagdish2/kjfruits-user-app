@@ -137,18 +137,25 @@ class _CustomDrawerWidgetState extends State<CustomDrawerWidget>
         widget.mainScreen,
 
         // 2. Scrim Overlay (fades in and closes on tap/swipe)
-        if (_percentOpen > 0.0)
-          GestureDetector(
-            onTap: close,
-            onPanUpdate: (details) {
-              if (details.delta.dx < -6 && !rtl || details.delta.dx < 6 && rtl) {
-                close();
-              }
-            },
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.4 * _percentOpen),
-            ),
-          ),
+        AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            if (_percentOpen == 0.0) {
+              return const SizedBox.shrink();
+            }
+            return GestureDetector(
+              onTap: close,
+              onPanUpdate: (details) {
+                if (details.delta.dx < -6 && !rtl || details.delta.dx < 6 && rtl) {
+                  close();
+                }
+              },
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.4 * _percentOpen),
+              ),
+            );
+          },
+        ),
 
         // 3. Sliding Drawer Menu
         AnimatedBuilder(
