@@ -81,7 +81,7 @@ class MenuWidget extends StatelessWidget {
   }) {
     return Column(
       children: items.map((model) {
-        final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
+        final isSelected = splash.pageIndex == splashProvider.screenList.indexWhere((screen) => screen.title == model.title);
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: Container(
@@ -92,7 +92,7 @@ class MenuWidget extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 if (!ResponsiveHelper.isDesktop(context)) {
-                  splash.setPageIndex(splashProvider.screenList.indexOf(model));
+                  splash.setPageIndex(splashProvider.screenList.indexWhere((screen) => screen.title == model.title));
                 }
                 drawerController!.toggle();
               },
