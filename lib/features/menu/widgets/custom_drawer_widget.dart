@@ -1,4 +1,3 @@
-import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter_grocery/features/menu/domain/enums/drawer_state_enun.dart';
 import 'package:flutter_grocery/features/menu/domain/models/custom_drawer_controller_model.dart';
@@ -48,12 +47,6 @@ class CustomDrawerWidget extends StatefulWidget {
 
 class _CustomDrawerWidgetState extends State<CustomDrawerWidget>
     with SingleTickerProviderStateMixin {
-  final Curve _scaleDownCurve = const Interval(0.0, 0.3, curve: Curves.easeOut);
-  final Curve _scaleUpCurve = const Interval(0.0, 1.0, curve: Curves.easeOut);
-  final Curve _slideOutCurve = const Interval(0.0, 1.0, curve: Curves.easeOut);
-  final Curve _slideInCurve =
-  const Interval(0.0, 1.0, curve: Curves.easeOut); // Curves.bounceOut
-
   /// check the slide direction
 
 
@@ -133,102 +126,62 @@ class _CustomDrawerWidgetState extends State<CustomDrawerWidget>
     super.dispose();
   }
 
-  Widget _zoomAndSlideContent(Widget? container,BuildContext context,
-      {double? angle, double? scale, double slide = 0}) {
-    double slidePercent, scalePercent;
-
-    /// determine current slide percent based on the MenuStatus
-    switch (_state) {
-      case DrawerState.closed:
-        slidePercent = 0.0;
-        scalePercent = 0.0;
-        break;
-      case DrawerState.open:
-        slidePercent = 1.0;
-        scalePercent = 1.0;
-        break;
-      case DrawerState.opening:
-        slidePercent =
-            (widget.openCurve ?? _slideOutCurve).transform(_percentOpen);
-        scalePercent = _scaleDownCurve.transform(_percentOpen);
-        break;
-      case DrawerState.closing:
-        slidePercent =
-            (widget.closeCurve ?? _slideInCurve).transform(_percentOpen);
-        scalePercent = _scaleUpCurve.transform(_percentOpen);
-        break;
-    }
-
-    final int rtlSlide = CustomDrawerWidget.isRTL(context) ? -1 : 1;
-
-    final slideAmount = (widget.slideWidth - slide) * slidePercent * rtlSlide;
-    final contentScale = (scale ?? 1.0) - (0.4 * scalePercent);
-    final cornerRadius = widget.borderRadius * _percentOpen;
-    final rotationAngle =
-        (((angle ?? widget.angle) * pi * rtlSlide) / 180) * _percentOpen;
-
-    return Transform(
-      transform: Matrix4.identity()
-        ..translateByDouble(slideAmount, 0.0, 0.0, 1.0)
-        ..rotateZ(rotationAngle)
-        ..scaleByDouble(contentScale, contentScale, 1.0, 1.0),
-      alignment: Alignment.centerLeft,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(cornerRadius),
-        child: container,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final slidePercent =
-    CustomDrawerWidget.isRTL(context) ? MediaQuery.of(context).size.width * .1 : 15.0;
+    final bool rtl = CustomDrawerWidget.isRTL(context);
 
     return Stack(
       children: [
-        GestureDetector(
-          child: widget.menuScreen,
+        // 1. Main Screen (flat background, stays at 100% scale)
+        widget.mainScreen,
 
-          onPanUpdate: (details) {
-            final bool rtl = CustomDrawerWidget.isRTL(context);
-            if (details.delta.dx < -6 && !rtl ||
-                details.delta.dx < 6 && rtl) {
-              toggle();
-            }
-          },
-        ),
-        if (widget.showShadow) ...[
-          /// Displaying the first shadow
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (_, w) => _zoomAndSlideContent(w,context,
-                angle: (widget.angle == 0.0) ? 0.0 : widget.angle - 8,
-                scale: .9,
-                slide: slidePercent * 2),
+        // 2. Scrim Overlay (fades in and closes on tap/swipe)
+        if (_percentOpen > 0.0)
+          GestureDetector(
+            onTap: close,
+            onPanUpdate: (details) {
+              if (details.delta.dx < -6 && !rtl || details.delta.dx < 6 && rtl) {
+                close();
+              }
+            },
             child: Container(
-              color: widget.backgroundColor.withAlpha(31),
+              color: Colors.black.withValues(alpha: 0.4 * _percentOpen),
             ),
           ),
 
-          /// Displaying the second shadow
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (_, w) => _zoomAndSlideContent(w,context,
-                angle: (widget.angle == 0.0) ? 0.0 : widget.angle - 4.0,
-                scale: .95,
-                slide: slidePercent),
-            child: Container(
-              color: widget.backgroundColor,
-            ),
-          )
-        ],
-
-        /// Displaying the main screen
+        // 3. Sliding Drawer Menu
         AnimatedBuilder(
           animation: _animationController,
-          builder: (_, w) => _zoomAndSlideContent(w, context),
-          child: widget.mainScreen,
+          builder: (context, child) {
+            final int rtlSign = rtl ? 1 : -1;
+            // slideAmount will translate from -slideWidth (closed) to 0.0 (open)
+            final double slideAmount = widget.slideWidth * rtlSign * (1.0 - _percentOpen);
+
+            return Positioned(
+              left: rtl ? null : 0,
+              right: rtl ? 0 : null,
+              top: 0,
+              bottom: 0,
+              child: Transform.translate(
+                offset: Offset(-slideAmount, 0),
+                child: Container(
+                  width: widget.slideWidth,
+                  decoration: BoxDecoration(
+                    color: widget.backgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15 * _percentOpen),
+                        blurRadius: 16,
+                        offset: Offset(rtl ? -4 : 4, 0),
+                      )
+                    ],
+                  ),
+                  child: widget.menuScreen,
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
