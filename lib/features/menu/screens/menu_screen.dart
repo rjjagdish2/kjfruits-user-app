@@ -60,10 +60,11 @@ class _MenuScreenState extends State<MenuScreen> {
       controller: _drawerController,
       menuScreen: MenuWidget(drawerController: _drawerController),
       mainScreen: MainScreen(drawerController: _drawerController, isReload: widget.isReload, fromIntro: widget.fromIntro),
-      showShadow: false,
-      angle: 0.0,
-      borderRadius: 30,
-      slideWidth:  MediaQuery.of(context).size.width * (localizationProvider.isLtr ? 0.6 : 0.1),
+      showShadow: true,
+      angle: -8.0,
+      borderRadius: 24,
+      slideWidth: MediaQuery.of(context).size.width * (localizationProvider.isLtr ? 0.7 : 0.3),
+      backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
     );
   }
 }
@@ -166,54 +167,64 @@ class MenuWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 30),
 
                     if(!ResponsiveHelper.isDesktop(context))
-                      Column(children: splashProvider.screenList.map((model) => model.isActive ? ListTile(
+                      Column(children: splashProvider.screenList.map((model) => model.isActive ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        child: ListTile(
                           onTap: (){
                             if(!ResponsiveHelper.isDesktop(context)) {
                               splash.setPageIndex(splashProvider.screenList.indexOf(model));
                             }
                             drawerController!.toggle();
-                        },
-                        selected: splash.pageIndex == splashProvider.screenList.indexOf(model),
-                        selectedTileColor: Colors.black.withAlpha(30),
-                        leading: CustomAssetImageWidget(
-                          model.icon, color: ResponsiveHelper.isDesktop(context)
-                            ? ColorResources.getDarkColor(context) : Colors.white,
-                          width: 25, height: 25,
-                        ),
-                        title: Text(getTranslated(model.title, context), style: poppinsRegular.copyWith(
-                          fontSize: Dimensions.fontSizeLarge,
-                          color: Provider.of<ThemeProvider>(context).darkTheme
-                              ? Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.6)
-                              : ResponsiveHelper.isDesktop(context)? ColorResources.getDarkColor(context): Theme.of(context).canvasColor,
-                        )),
-                      ) : const SizedBox.shrink()).toList()),
-
-
-                      ListTile(
-                        onTap: () {
-                          if(isLoggedIn) {
-                            showDialog(context: context, barrierDismissible: false, builder: (context) => const SignOutDialogWidget());
-                          }else {
-                            splashProvider.setPageIndex(0);
-                            RouteHelper.getLoginRoute(action: RouteAction.pushNamedAndRemoveUntil);
-                          }
-                        },
-                        leading: CustomAssetImageWidget(isLoggedIn ? Images.logOut : Images.logIn,
-                          width: 25, height: 25,
-                          color: Colors.white,
-                        ),
-                        title: Text(
-                          getTranslated(isLoggedIn ? 'log_out' : 'login', context),
-                          style: poppinsRegular.copyWith(
+                          },
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          selected: splash.pageIndex == splashProvider.screenList.indexOf(model),
+                          selectedTileColor: Provider.of<ThemeProvider>(context).darkTheme
+                              ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
+                              : Colors.white.withValues(alpha: 0.15),
+                          leading: CustomAssetImageWidget(
+                            model.icon, color: ResponsiveHelper.isDesktop(context)
+                              ? ColorResources.getDarkColor(context) : Colors.white,
+                            width: 25, height: 25,
+                          ),
+                          title: Text(getTranslated(model.title, context), style: poppinsRegular.copyWith(
                             fontSize: Dimensions.fontSizeLarge,
                             color: Provider.of<ThemeProvider>(context).darkTheme
                                 ? Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.6)
-                                : ResponsiveHelper.isDesktop(context)
-                                ? ColorResources.getDarkColor(context)
-                                : Theme.of(context).canvasColor,
+                                : ResponsiveHelper.isDesktop(context)? ColorResources.getDarkColor(context): Theme.of(context).canvasColor,
+                          )),
+                        ),
+                      ) : const SizedBox.shrink()).toList()),
+
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        child: ListTile(
+                          onTap: () {
+                            if(isLoggedIn) {
+                              showDialog(context: context, barrierDismissible: false, builder: (context) => const SignOutDialogWidget());
+                            }else {
+                              splashProvider.setPageIndex(0);
+                              RouteHelper.getLoginRoute(action: RouteAction.pushNamedAndRemoveUntil);
+                            }
+                          },
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          leading: CustomAssetImageWidget(isLoggedIn ? Images.logOut : Images.logIn,
+                            width: 25, height: 25,
+                            color: Colors.white,
+                          ),
+                          title: Text(
+                            getTranslated(isLoggedIn ? 'log_out' : 'login', context),
+                            style: poppinsRegular.copyWith(
+                              fontSize: Dimensions.fontSizeLarge,
+                              color: Provider.of<ThemeProvider>(context).darkTheme
+                                  ? Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.6)
+                                  : ResponsiveHelper.isDesktop(context)
+                                  ? ColorResources.getDarkColor(context)
+                                  : Theme.of(context).canvasColor,
+                            ),
                           ),
                         ),
                       ),

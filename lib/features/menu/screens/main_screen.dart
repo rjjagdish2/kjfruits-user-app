@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
                       AppBar(
                         backgroundColor: Theme.of(context).cardColor,
                         leading: IconButton(
-                          icon: Image.asset(Images.moreIcon, color: Theme.of(context).primaryColor, height: 30, width: 30),
+                          icon: Icon(Icons.menu_rounded, color: Theme.of(context).primaryColor, size: 28),
                           onPressed: () {
                             widget.drawerController.toggle();
                           },
