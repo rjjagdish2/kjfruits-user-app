@@ -3,13 +3,13 @@ import 'package:flutter_grocery/utill/app_constants.dart';
 
 ThemeData dark = ThemeData(
   fontFamily: AppConstants.fontFamily,
-  primaryColor: const Color(0xFF34D399),
-  secondaryHeaderColor: const Color(0xFF064E3B),
+  primaryColor: const Color(0xFF00D0AF),
+  secondaryHeaderColor: const Color(0xFF01937C),
   brightness: Brightness.dark,
   scaffoldBackgroundColor: const Color(0xFF0F172A),
   cardColor: const Color(0xFF1E293B),
   hintColor: const Color(0xFF94A3B8),
-  focusColor: const Color(0xFF10B981),
+  focusColor: const Color(0xFF00D0AF),
   canvasColor: const Color(0xFF1E293B),
   shadowColor: Colors.black.withValues(alpha: 0.4),
 
@@ -41,9 +41,9 @@ ThemeData dark = ThemeData(
   ),
   colorScheme: ColorScheme(
     brightness: Brightness.dark,
-    primary: const Color(0xFF34D399),
+    primary: const Color(0xFF00D0AF),
     onPrimary: const Color(0xFF0F172A),
-    secondary: const Color(0xFF064E3B),
+    secondary: const Color(0xFF01937C),
     onSecondary: Colors.white,
     error: Colors.redAccent,
     onError: Colors.white,

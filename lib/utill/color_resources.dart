@@ -30,7 +30,7 @@ class ColorResources {
 
 
   static Color getAppBarHeaderColor(BuildContext context) {
-    return Provider.of<ThemeProvider>(context).darkTheme ? const Color(0xFF064E3B) : const Color(0xFFECFDF5);
+    return Provider.of<ThemeProvider>(context).darkTheme ? const Color(0xFF01937C) : const Color(0xFFE6F7F4);
   }
 
   static Color getChatAdminColor(BuildContext context) {
@@ -41,7 +41,7 @@ class ColorResources {
   }
   static const Color cartShadowColor = Color(0xFFCBD5E1);
   static const Color ratingColor = Color(0xFFFFB000);
-  static const Color colorGreen = Color(0xFF10B981);
+  static const Color colorGreen = Color(0xFF01937C);
   static const Color colorBlue = Color(0xFF0EA5E9);
   static const Color redColor = Color(0xFFEF4444);
 
