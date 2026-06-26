@@ -19,35 +19,52 @@ class ProductImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SplashProvider splashProvider = Provider.of<SplashProvider>(context,listen: false);
+    final bool hasImage = productModel?.image != null && productModel!.image!.isNotEmpty;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Stack(children: [
           InkWell(
-            onTap: () => RouteHelper.getProductImagesRoute(productModel!.name, jsonEncode(productModel!.image), splashProvider.baseUrls?.productImageUrl ?? ''),
+            onTap: () => RouteHelper.getProductImagesRoute(
+              productModel?.name ?? '',
+              jsonEncode(productModel?.image ?? []),
+              splashProvider.baseUrls?.productImageUrl ?? '',
+            ),
             child: Consumer<CartProvider>(
               builder: (context, cartProvider, _) {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: ResponsiveHelper.isDesktop(context) ? 350 : MediaQuery.of(context).size.height * 0.4,
                   child: PageView.builder(
-                    itemCount: productModel?.image?.length,
+                    itemCount: hasImage ? productModel!.image!.length : 1,
                     itemBuilder: (context, index) {
+                      String imagePath = '';
+                      if (hasImage) {
+                        final selectedIndex = cartProvider.productSelect;
+                        if (selectedIndex >= 0 && selectedIndex < productModel!.image!.length) {
+                          imagePath = '${Provider.of<SplashProvider>(context, listen: false).baseUrls!.productImageUrl}/${productModel!.image![selectedIndex]}';
+                        } else {
+                          imagePath = '${Provider.of<SplashProvider>(context, listen: false).baseUrls!.productImageUrl}/${productModel!.image![0]}';
+                        }
+                      }
+
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(15),
                           child: CustomImageWidget(
-                            image: '${Provider.of<SplashProvider>(context, listen: false).baseUrls!.productImageUrl}/${productModel!.image![cartProvider.productSelect]}',
+                            image: imagePath,
                             fit: BoxFit.cover,
                           ),
                         ),
                       );
                     },
                     onPageChanged: (index) {
-                      Provider.of<CartProvider>(context, listen: false).onSelectProductStatus(index, true);
-                      Provider.of<ProductProvider>(context, listen: false).setImageSliderSelectedIndex(index);
+                      if (hasImage) {
+                        Provider.of<CartProvider>(context, listen: false).onSelectProductStatus(index, true);
+                        Provider.of<ProductProvider>(context, listen: false).setImageSliderSelectedIndex(index);
+                      }
                     },
                   ),
                 );
