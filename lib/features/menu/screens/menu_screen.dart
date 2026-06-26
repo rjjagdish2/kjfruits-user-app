@@ -167,7 +167,17 @@ class MenuWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(
+                          color: Provider.of<ThemeProvider>(context).darkTheme || ResponsiveHelper.isDesktop(context)
+                              ? Theme.of(context).dividerColor.withValues(alpha: 0.4)
+                              : Colors.white.withValues(alpha: 0.2),
+                          height: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
 
                     if(!ResponsiveHelper.isDesktop(context))
                       Column(children: splashProvider.screenList.map((model) => model.isActive ? Padding(
@@ -198,6 +208,15 @@ class MenuWidget extends StatelessWidget {
                         ),
                       ) : const SizedBox.shrink()).toList()),
 
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Divider(
+                          color: Provider.of<ThemeProvider>(context).darkTheme || ResponsiveHelper.isDesktop(context)
+                              ? Theme.of(context).dividerColor.withValues(alpha: 0.4)
+                              : Colors.white.withValues(alpha: 0.2),
+                          height: 1,
+                        ),
+                      ),
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
