@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_grocery/common/widgets/custom_asset_image_widget.dart';
 import 'package:flutter_grocery/features/menu/domain/models/custom_drawer_controller_model.dart';
-import 'package:flutter_grocery/features/menu/domain/models/main_screen_model.dart';
 import 'package:flutter_grocery/helper/responsive_helper.dart';
 import 'package:flutter_grocery/helper/route_helper.dart';
 import 'package:flutter_grocery/localization/language_constraints.dart';
@@ -64,106 +63,10 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 }
 
-class MenuWidget extends StatefulWidget {
+class MenuWidget extends StatelessWidget {
   final CustomDrawerController? drawerController;
 
   const MenuWidget({super.key, this.drawerController});
-
-  @override
-  State<MenuWidget> createState() => _MenuWidgetState();
-}
-
-class _MenuWidgetState extends State<MenuWidget> {
-  bool _isPoliciesExpanded = false;
-
-  Widget _buildSectionHeader(String title, Color textColor) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 24.0, top: 18.0, bottom: 6.0),
-      child: Text(
-        title.toUpperCase(),
-        style: poppinsBold.copyWith(
-          fontSize: 11,
-          color: textColor.withValues(alpha: 0.6),
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuGroup(
-    BuildContext context, {
-    required List<MainScreenModel> items,
-    required SplashProvider splash,
-    required SplashProvider splashProvider,
-    required Color activeTileBg,
-    required Color activeTextColor,
-    required Color textPrimaryColor,
-    required Color textSecondaryColor,
-  }) {
-    return Column(
-      children: items.map((model) {
-        final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: InkWell(
-            onTap: () {
-              if (!ResponsiveHelper.isDesktop(context)) {
-                splash.setPageIndex(splashProvider.screenList.indexOf(model));
-              }
-              widget.drawerController!.toggle();
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? activeTileBg : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  if (isSelected)
-                    Container(
-                      width: 4,
-                      height: 20,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: activeTextColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 12),
-                  CustomAssetImageWidget(
-                    model.icon,
-                    color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                    width: 20,
-                    height: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      getTranslated(model.title, context),
-                      style: poppinsMedium.copyWith(
-                        fontSize: 15,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ),
-                  if (isSelected)
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 12,
-                      color: activeTextColor,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,8 +117,8 @@ class _MenuWidgetState extends State<MenuWidget> {
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
-        if(!ResponsiveHelper.isDesktop(context) && widget.drawerController?.isOpen()) {
-          widget.drawerController?.toggle();
+        if(!ResponsiveHelper.isDesktop(context) && drawerController?.isOpen()) {
+          drawerController?.toggle();
         }
       },
       child: Scaffold(
@@ -235,30 +138,6 @@ class _MenuWidgetState extends State<MenuWidget> {
                   child: Consumer<SplashProvider>(
                     builder: (context, splash, child) {
                       final activeScreens = splashProvider.screenList.where((model) => model.isActive).toList();
-
-                      final List<String> shopExploreTitles = ['home', 'all_categories', 'shopping_bag', 'favourite'];
-                      final List<String> ordersOffersTitles = ['my_order', 'order_track', 'address', 'coupon', 'wallet', 'loyalty_point', 'referAndEarn'];
-                      final List<String> supportSettingsTitles = ['live_chat', 'settings'];
-                      final List<String> policyTitles = [
-                        'about_us',
-                        'faq',
-                        'terms_and_condition',
-                        'privacy_policy',
-                        'return_policy',
-                        'refund_policy',
-                        'cancellation_policy'
-                      ];
-
-                      final shopExploreItems = activeScreens.where((m) => shopExploreTitles.contains(m.title)).toList();
-                      final ordersOffersItems = activeScreens.where((m) => ordersOffersTitles.contains(m.title)).toList();
-                      final supportSettingsItems = activeScreens.where((m) => supportSettingsTitles.contains(m.title)).toList();
-                      final policyItems = activeScreens.where((m) => policyTitles.contains(m.title)).toList();
-
-                      final allKnownTitles = [...shopExploreTitles, ...ordersOffersTitles, ...supportSettingsTitles, ...policyTitles];
-                      final otherItems = activeScreens.where((m) => !allKnownTitles.contains(m.title)).toList();
-                      if (otherItems.isNotEmpty) {
-                        supportSettingsItems.addAll(otherItems);
-                      }
 
                       return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +171,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                                  icon: Icon(Icons.close_rounded, color: textPrimaryColor, size: 18),
                                  padding: EdgeInsets.zero,
                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                 onPressed: () => widget.drawerController!.toggle(),
+                                 onPressed: () => drawerController!.toggle(),
                                ),
                              ),
                            ],
@@ -391,177 +270,81 @@ class _MenuWidgetState extends State<MenuWidget> {
                           ),
                         ),
 
-                        // Shop & Explore Group
-                        if (shopExploreItems.isNotEmpty && !ResponsiveHelper.isDesktop(context)) ...[
-                          _buildSectionHeader('Shop & Explore', activeTextColor),
-                          _buildMenuGroup(
-                            context,
-                            items: shopExploreItems,
-                            splash: splash,
-                            splashProvider: splashProvider,
-                            activeTileBg: activeTileBg,
-                            activeTextColor: activeTextColor,
-                            textPrimaryColor: textPrimaryColor,
-                            textSecondaryColor: textSecondaryColor,
+                        // Section Divider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Divider(
+                            color: textSecondaryColor.withValues(alpha: 0.15),
+                            height: 1,
                           ),
-                        ],
+                        ),
+                        const SizedBox(height: 8),
 
-                        // Orders & Offers Group
-                        if (ordersOffersItems.isNotEmpty && !ResponsiveHelper.isDesktop(context)) ...[
-                          _buildSectionHeader('Orders & Offers', activeTextColor),
-                          _buildMenuGroup(
-                            context,
-                            items: ordersOffersItems,
-                            splash: splash,
-                            splashProvider: splashProvider,
-                            activeTileBg: activeTileBg,
-                            activeTextColor: activeTextColor,
-                            textPrimaryColor: textPrimaryColor,
-                            textSecondaryColor: textSecondaryColor,
-                          ),
-                        ],
-
-                        // Support & Settings Group
-                        if (supportSettingsItems.isNotEmpty && !ResponsiveHelper.isDesktop(context)) ...[
-                          _buildSectionHeader('Support & Settings', activeTextColor),
-                          _buildMenuGroup(
-                            context,
-                            items: supportSettingsItems,
-                            splash: splash,
-                            splashProvider: splashProvider,
-                            activeTileBg: activeTileBg,
-                            activeTextColor: activeTextColor,
-                            textPrimaryColor: textPrimaryColor,
-                            textSecondaryColor: textSecondaryColor,
-                          ),
-                        ],
-
-                        // Policies & Info Collapsible Group
-                        if (policyItems.isNotEmpty && !ResponsiveHelper.isDesktop(context)) ...[
-                          _buildSectionHeader('Policies & Info', activeTextColor),
-                          Builder(
-                            builder: (context) {
-                              final isAnyPolicySelected = policyItems.any((m) => splash.pageIndex == splashProvider.screenList.indexOf(m));
-                              final String policiesLabel = getTranslated('policies_and_info', context) == 'policies_and_info'
-                                  ? 'Policies & Info'
-                                  : getTranslated('policies_and_info', context);
-                              return Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          _isPoliciesExpanded = !_isPoliciesExpanded;
-                                        });
-                                      },
+                        // Flat List Menu Items
+                        if (!ResponsiveHelper.isDesktop(context))
+                          Column(
+                            children: activeScreens.map((model) {
+                              final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (!ResponsiveHelper.isDesktop(context)) {
+                                      splash.setPageIndex(splashProvider.screenList.indexOf(model));
+                                    }
+                                    drawerController!.toggle();
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? activeTileBg : Colors.transparent,
                                       borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                        decoration: BoxDecoration(
-                                          color: isAnyPolicySelected ? activeTileBg : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        if (isSelected)
+                                          Container(
+                                            width: 4,
+                                            height: 20,
+                                            margin: const EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                              color: activeTextColor,
+                                              borderRadius: BorderRadius.circular(2),
+                                            ),
+                                          )
+                                        else
+                                          const SizedBox(width: 12),
+                                        CustomAssetImageWidget(
+                                          model.icon,
+                                          color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
+                                          width: 20,
+                                          height: 20,
                                         ),
-                                        child: Row(
-                                          children: [
-                                            if (isAnyPolicySelected)
-                                              Container(
-                                                width: 4,
-                                                height: 20,
-                                                margin: const EdgeInsets.only(right: 8),
-                                                decoration: BoxDecoration(
-                                                  color: activeTextColor,
-                                                  borderRadius: BorderRadius.circular(2),
-                                                ),
-                                              )
-                                            else
-                                              const SizedBox(width: 12),
-                                            Icon(
-                                              Icons.policy_outlined,
-                                              color: isAnyPolicySelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                                              size: 20,
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            getTranslated(model.title, context),
+                                            style: poppinsMedium.copyWith(
+                                              fontSize: 15,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                              color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
                                             ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                policiesLabel,
-                                                style: poppinsMedium.copyWith(
-                                                  fontSize: 15,
-                                                  fontWeight: isAnyPolicySelected ? FontWeight.w600 : FontWeight.w500,
-                                                  color: isAnyPolicySelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.8),
-                                                ),
-                                              ),
-                                            ),
-                                            Icon(
-                                              _isPoliciesExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                                              color: isAnyPolicySelected ? activeTextColor : textSecondaryColor,
-                                              size: 20,
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
+                                        if (isSelected)
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 12,
+                                            color: activeTextColor,
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                  if (_isPoliciesExpanded)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 12.0),
-                                      child: Column(
-                                        children: policyItems.map((model) {
-                                          final isSelected = splash.pageIndex == splashProvider.screenList.indexOf(model);
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                                            child: InkWell(
-                                              onTap: () {
-                                                if (!ResponsiveHelper.isDesktop(context)) {
-                                                  splash.setPageIndex(splashProvider.screenList.indexOf(model));
-                                                }
-                                                widget.drawerController!.toggle();
-                                              },
-                                              borderRadius: BorderRadius.circular(12),
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                                decoration: BoxDecoration(
-                                                  color: isSelected ? activeTileBg : Colors.transparent,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    const SizedBox(width: 16),
-                                                    CustomAssetImageWidget(
-                                                      model.icon,
-                                                      color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.6),
-                                                      width: 18,
-                                                      height: 18,
-                                                    ),
-                                                    const SizedBox(width: 12),
-                                                    Expanded(
-                                                      child: Text(
-                                                        getTranslated(model.title, context),
-                                                        style: poppinsMedium.copyWith(
-                                                          fontSize: 14,
-                                                          color: isSelected ? activeTextColor : textPrimaryColor.withValues(alpha: 0.7),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    if (isSelected)
-                                                      Icon(
-                                                        Icons.arrow_forward_ios_rounded,
-                                                        size: 10,
-                                                        color: activeTextColor,
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                ],
+                                ),
                               );
-                            },
+                            }).toList(),
                           ),
-                        ],
 
                         // Bottom Divider
                         Padding(
