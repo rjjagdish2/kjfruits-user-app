@@ -302,80 +302,90 @@ class _MenuWidgetState extends State<MenuWidget> {
                         // Profile Info Section Card
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              gradient: profileCardGradient,
-                              borderRadius: BorderRadius.circular(18),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: (isDark ? Colors.black : Theme.of(context).primaryColor).withValues(alpha: 0.15),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 8),
-                                )
-                              ],
-                              border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.15)),
-                            ),
-                            child: Consumer<ProfileProvider>(
-                              builder: (context, profileProvider, child) => Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.1),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ],
-                                    ),
-                                    child: ClipOval(
-                                      child: isLoggedIn ? splashProvider.baseUrls != null ?
-                                      CustomImageWidget(
-                                        placeholder: Images.profile,
-                                        image: '${splashProvider.baseUrls?.customerImageUrl}/${profileProvider.userInfoModel?.image}',
-                                        height: 52, width: 52, fit: BoxFit.cover,
-                                      ) : const SizedBox() : Image.asset(Images.profile, height: 52, width: 52, fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        isLoggedIn ? profileProvider.userInfoModel != null ? Text(
-                                          '${profileProvider.userInfoModel!.fName ?? ''} ${profileProvider.userInfoModel!.lName ?? ''}',
-                                          style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
-                                          maxLines: 1, overflow: TextOverflow.ellipsis,
-                                        ) : Container(height: 12, width: 120, color: cardTextSecondaryColor.withValues(alpha: 0.2)) : Text(
-                                          getTranslated('guest', context),
-                                          style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        if(isLoggedIn && profileProvider.userInfoModel != null ) Text(
-                                          profileProvider.userInfoModel!.phone ?? '',
-                                          style: poppinsRegular.copyWith(color: cardTextSecondaryColor, fontSize: Dimensions.fontSizeSmall),
-                                          maxLines: 1, overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.15),
-                                    ),
-                                    child: IconButton(
-                                      icon: Icon(Icons.notifications_none_rounded, color: cardTextPrimaryColor, size: 22),
-                                      onPressed: () {
-                                        RouteHelper.getNotificationScreen();
-                                      },
-                                    ),
-                                  ),
+                          child: InkWell(
+                            onTap: () {
+                              if(isLoggedIn) {
+                                RouteHelper.getProfileScreen();
+                              } else {
+                                RouteHelper.getLoginRoute();
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                gradient: profileCardGradient,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (isDark ? Colors.black : Theme.of(context).primaryColor).withValues(alpha: 0.15),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
+                                  )
                                 ],
+                                border: Border.all(color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.15)),
+                              ),
+                              child: Consumer<ProfileProvider>(
+                                builder: (context, profileProvider, child) => Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          )
+                                        ],
+                                      ),
+                                      child: ClipOval(
+                                        child: isLoggedIn ? splashProvider.baseUrls != null ?
+                                        CustomImageWidget(
+                                          placeholder: Images.profile,
+                                          image: '${splashProvider.baseUrls?.customerImageUrl}/${profileProvider.userInfoModel?.image}',
+                                          height: 52, width: 52, fit: BoxFit.cover,
+                                        ) : const SizedBox() : Image.asset(Images.profile, height: 52, width: 52, fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          isLoggedIn ? profileProvider.userInfoModel != null ? Text(
+                                            '${profileProvider.userInfoModel!.fName ?? ''} ${profileProvider.userInfoModel!.lName ?? ''}',
+                                            style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                                          ) : Container(height: 12, width: 120, color: cardTextSecondaryColor.withValues(alpha: 0.2)) : Text(
+                                            getTranslated('guest', context),
+                                            style: poppinsSemiBold.copyWith(color: cardTextPrimaryColor, fontSize: Dimensions.fontSizeLarge),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          if(isLoggedIn && profileProvider.userInfoModel != null ) Text(
+                                            profileProvider.userInfoModel!.phone ?? '',
+                                            style: poppinsRegular.copyWith(color: cardTextSecondaryColor, fontSize: Dimensions.fontSizeSmall),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withValues(alpha: 0.15),
+                                      ),
+                                      child: IconButton(
+                                        icon: Icon(Icons.notifications_none_rounded, color: cardTextPrimaryColor, size: 22),
+                                        onPressed: () {
+                                          RouteHelper.getNotificationScreen();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
